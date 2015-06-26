@@ -21,45 +21,42 @@ def main():
     model_dir = os.path.join(abspath, 'model')
 
     hmm = os.path.join(model_dir, HMM)
-    print(hmm)
     lm = os.path.join(model_dir, LM)
-    print(lm)
     dic = os.path.join(model_dir, DIC)
-    print(dic)
 
     config = Decoder.default_config()
     config.set_string('-hmm', hmm)
     config.set_string('-lm', lm)
     config.set_string('-dict', dic)
+    config.set_string('-logfn', '/dev/null')
     decoder = Decoder(config)
 
     p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=2048)
     stream.start_stream()
     in_speech_bf = True
     decoder.start_utt()
     while True:
-        buf = stream.read(1024)
+        buf = stream.read(2048)
         if buf:
             decoder.process_raw(buf, False, False)
-            try:
-                if decoder.hyp().hypstr != '':
-                    print('Partial decoding result:', decoder.hyp().hypstr)
-            except AttributeError:
-                pass
             if decoder.get_in_speech():
                 sys.stdout.write('.')
                 sys.stdout.flush()
-            if decoder.get_in_speech() != in_speech_bf:
-                in_speech_bf = decoder.get_in_speech()
-                if not in_speech_bf:
-                    decoder.end_utt()
-                    try:
-                        if decoder.hyp().hypstr != '':
-                            print('Stream decoding result:', decoder.hyp().hypstr)
-                    except AttributeError:
-                        pass
-                    decoder.start_utt()
+            if decoder.get_in_speech() == in_speech_bf:
+                continue
+
+            in_speech_bf = decoder.get_in_speech()
+            if in_speech_bf:
+                continue
+
+            decoder.end_utt()
+            try:
+                if decoder.hyp().hypstr != '':
+                    print('You said:', decoder.hyp().hypstr)
+            except AttributeError:
+                pass
+            decoder.start_utt()
         else:
             break
     decoder.end_utt()
