@@ -4,7 +4,7 @@
 import os
 import sys
 import pyaudio
-from pocketsphinx.pocketsphinx import *
+from pocketsphinx.pocketsphinx import Decoder
 from sphinxbase.sphinxbase import *
 
 
