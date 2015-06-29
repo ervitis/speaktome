@@ -12,6 +12,17 @@ ROOT = 'voxforge-es-0.2'
 LM = ROOT + '/etc/voxforge_es_sphinx.transcription.test.lm'
 DIC = ROOT + '/etc/voxforge_es_sphinx.dic'
 HMM = ROOT + '/model_parameters/voxforge_es_sphinx.cd_ptm_3000/'
+BUFFER = 1024
+
+
+def capture_signal():
+    import signal
+    signal.signal(signal.SIGINT, signal_handler)
+
+
+def signal_handler(signal, frame):
+    print('App stopped')
+    sys.exit(0)
 
 
 def main():
@@ -32,12 +43,12 @@ def main():
     decoder = Decoder(config)
 
     p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=2048)
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=BUFFER)
     stream.start_stream()
     in_speech_bf = True
     decoder.start_utt()
     while True:
-        buf = stream.read(2048)
+        buf = stream.read(BUFFER)
         if buf:
             decoder.process_raw(buf, False, False)
             if decoder.get_in_speech():
@@ -64,4 +75,5 @@ def main():
 
 
 if __name__ == '__main__':
+    capture_signal()
     main()
