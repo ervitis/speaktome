@@ -6,3 +6,4 @@ local
 *.pyc
 pip-selfcheck.json
 model
+temp
