@@ -2,7 +2,7 @@
 
 
 import os
-from ctypes import CFUNCTYPE, cdll, pointer
+from ctypes import CFUNCTYPE, cdll
 from contextlib import contextmanager
 
 try:
@@ -13,7 +13,6 @@ except ImportError:
     exit(1)
 
 
-# ESTO ES UNA PUTA MIERDA...
 ERROR_HANDLER_FUNC = CFUNCTYPE(None)
 
 
@@ -63,7 +62,8 @@ class SmAudio:
         self._temp_file = os.path.join(self._temp_path, WAVE_OUTPUT_FILE)
 
     def __enter__(self):
-        with noalsaerr():            self.audio = pyaudio.PyAudio()
+        with noalsaerr():
+            self.audio = pyaudio.PyAudio()
         self.stream = self.audio.open(format=self.audio_format,
                                       channels=self.channels,
                                       rate=self.rate,
