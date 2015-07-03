@@ -7,3 +7,4 @@ local
 pip-selfcheck.json
 model
 temp
+.config
